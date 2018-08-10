@@ -19,6 +19,20 @@ Parameters:
 #       Type: Canary10Percent5Minutes
 
 Resources:
+  Signin:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: dist/index.signin
+      Runtime: nodejs8.10
+      Role:
+        Fn::ImportValue:
+          !Join ['-', [!Ref 'ProjectId', !Ref 'AWS::Region', 'LambdaTrustRole']]
+      Events:
+        GetEvent:
+          Type: Api
+          Properties:
+            Path: /signin
+            Method: get
   GetHelloWorld:
     Type: AWS::Serverless::Function
     Properties:
