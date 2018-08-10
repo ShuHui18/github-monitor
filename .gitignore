@@ -1,0 +1,11 @@
+dist*
+node_modules*
+.vscode*
+.vs
+.terraform*
+terraform.tfstate*
+stsassume-*.sh
+
+yarn-error.log
+
+package-lock.json
