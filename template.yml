@@ -22,7 +22,7 @@ Resources:
   GetHelloWorld:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: src/index.get
+      Handler: dist/index.get
       Runtime: nodejs8.10
       Role:
         Fn::ImportValue:
