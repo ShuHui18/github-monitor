@@ -1,8 +1,8 @@
 import fs from 'fs';
 import yaml from 'js-yaml';
 import moment from 'moment';
-import gitHelper from './gitHelper';
-import { renderTemplate } from './templateHelper';
+import githubApi from './services/githubApi';
+import { renderTemplate } from './helpers/templateHelper';
 
 const gitRepos = yaml.safeLoad(fs.readFileSync(`${__dirname}/../public/gitRepos.yml`, 'utf8'));
 
@@ -13,18 +13,15 @@ function getExpiredTime(date1, date2) {
 }
 
 function hasSha(commits, sha) {
-  if (commits.data.size === 0 || commits.data.find(commit => commit.sha === sha) === undefined) {
-    return false;
-  }
-  return true;
+  return commits.data.size !== 0 && commits.data.find(commit => commit.sha === sha) !== undefined;
 }
 
-async function repoReport(repo, code) {
+async function repoReport(repo, accessToken) {
   const [developInfo, masterInfo] = await Promise.all([
-    gitHelper.fetchBranchInfo(repo.owner, repo.repoName, 'develop', code),
-    gitHelper.fetchBranchInfo(repo.owner, repo.repoName, 'master', code),
+    githubApi.fetchBranchInfo(repo.owner, repo.repoName, 'develop', accessToken),
+    githubApi.fetchBranchInfo(repo.owner, repo.repoName, 'master', accessToken),
   ]);
-  const masterCommits = await gitHelper.fetchBranchCommit(repo.owner, repo.repoName, 'master', developInfo.date, code);
+  const masterCommits = await githubApi.fetchBranchCommit(repo.owner, repo.repoName, 'master', developInfo.date, accessToken);
   let prUrl;
   let expiredTime;
   let upToDate = true;
@@ -41,15 +38,23 @@ async function repoReport(repo, code) {
   };
 }
 
-async function branchCheck(code) {
-  const gitReposInfo = await Promise.all(gitRepos.map( repo => repoReport(repo, code)));
-  return renderTemplate('repoList', { repos: gitReposInfo });
+async function branchCheck(event) {
+  const gitReposInfo = await Promise.all(gitRepos.map(repo => repoReport(repo, event.accessToken)));
+  const contents = await renderTemplate('repoList', { repos: gitReposInfo });
+  return {
+    statusCode: 200,
+    body: contents,
+    headers: { 'content-type': 'text/html' },
+  };
 }
 
-async function pr(req, res) {
-  const { owner, repoName } = req.query;
-  const prRes = await gitHelper.createPR(owner, repoName);
-  res.redirect(prRes.data.html_url);
+async function pr(event) {
+  const { owner, repoName } = event.queryStringParameters;
+  const prRes = await githubApi.createPR(owner, repoName, event.accessToken);
+  return {
+    statusCode: 302,
+    headers: { Location: prRes.data.html_url },
+  };
 }
 
 export { branchCheck, pr };

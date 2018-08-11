@@ -1,33 +1,29 @@
-import url from 'url';;
-import { branchCheck } from './branchCheckController';
+import githubAuth from './services/githubAuth';
+import authorization from './middlewares/authorization';
+import { branchCheck, pr } from './branchCheckController';
+import requestInterceptor from './middlewares/requestInterceptor';
 
-function signin(event, context, callback) {
-  const location = url.format({
-    protocol: 'https',
-    hostname: 'github.com',
-    pathname: '/login/oauth/authorize',
-    query: {
-      client_id: 'f5f40bab8debde6aeb24',
-    }
-  });
+async function createPr(event, context, callback) {
+  const result = await requestInterceptor(event, pr, authorization.check);
+  callback(null, result);
+}
+
+async function oauth(event, context, callback) {
+  const token = await githubAuth.accessToken(event.queryStringParameters.code);
   const result = {
     statusCode: 302,
-    headers: {'Location': location.toString()},
+    headers: {
+      Location: '/',
+      'Set-Cookie': `access_token=${token}`,
+    },
   };
   callback(null, result);
 }
 
-function get(event, context, callback) {
-  const code = event.queryStringParameters.code;
-  // https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/
-  branchCheck(code).then( (contents) => {
-    const result = {
-      statusCode: 200,
-      body: contents,
-      headers: {'content-type': 'text/html'}
-    };
-    callback(null, result);
-  }).catch(console.log);
-};
+async function repoList(event, context, callback) {
+  const result = await requestInterceptor(event, branchCheck, authorization.check);
+  callback(null, result);
+}
 
-export { signin, get };
+
+export { createPr, oauth, repoList };

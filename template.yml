@@ -19,10 +19,10 @@ Parameters:
 #       Type: Canary10Percent5Minutes
 
 Resources:
-  Signin:
+  CreatePr:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: dist/index.signin
+      Handler: dist/index.createPr
       Runtime: nodejs8.10
       Role:
         Fn::ImportValue:
@@ -31,13 +31,28 @@ Resources:
         GetEvent:
           Type: Api
           Properties:
-            Path: /signin
+            Path: /pr
             Method: get
-  GetHelloWorld:
+  OauthCallback:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: dist/index.get
+      Handler: dist/index.oauth
       Runtime: nodejs8.10
+      Role:
+        Fn::ImportValue:
+          !Join ['-', [!Ref 'ProjectId', !Ref 'AWS::Region', 'LambdaTrustRole']]
+      Events:
+        GetEvent:
+          Type: Api
+          Properties:
+            Path: /oauth
+            Method: get
+  RepoList:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: dist/index.repoList
+      Runtime: nodejs8.10
+      Timeout: 10
       Role:
         Fn::ImportValue:
           !Join ['-', [!Ref 'ProjectId', !Ref 'AWS::Region', 'LambdaTrustRole']]

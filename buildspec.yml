@@ -10,6 +10,7 @@ phases:
       - pip install --upgrade awscli
   pre_build:
     commands:
+      - npm run eslint
       # Discover and run unit tests in the 'tests' directory
       - npm test
   build:

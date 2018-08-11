@@ -1,7 +1,7 @@
 import ejs from 'ejs';
 
 function getTemplatePath(templateName) {
-  return `${__dirname}/../public/${templateName}.ejs`;
+  return `${__dirname}/../../public/${templateName}.ejs`;
 }
 
 function renderTemplate(templateName, payload) {

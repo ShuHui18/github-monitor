@@ -10,12 +10,16 @@
         "babel-core": "^6.26.3",
         "babel-jest": "^23.0.1",
         "babel-preset-env": "^1.7.0",
-        "babel-plugin-transform-object-rest-spread": "^6.26.0"
+        "babel-plugin-transform-object-rest-spread": "^6.26.0",
+        "eslint": "^4.15.0",
+        "eslint-config-airbnb-base": "^12.1.0",
+        "eslint-plugin-import": "^2.8.0"
     },
     "scripts": {
         "clean": "rm -rf dist && mkdir dist",
         "build": "npm run clean && babel -d ./dist ./src",
-        "test": "mocha --recursive tests"
+        "test": "mocha --recursive tests",
+        "eslint": "eslint test src"
     },
     "dependencies": {
         "axios": "^0.18.0",

@@ -1,18 +1,16 @@
 import axios from 'axios';
 
 const GITHUB_API_URL = 'https://api.github.com/';
-// const ACCESS_TOKEN = 'fa1867c11bc69bde4346af2aa076f11b88a644da';
 
-class GitHelper {
+class GithubApi {
   constructor() {
     this.githubApiUrl = GITHUB_API_URL;
-    // this.accessToken = ACCESS_TOKEN;
   }
-  async fetchBranchInfo(owner, repoName, branch, code) {
+  async fetchBranchInfo(owner, repoName, branch, accessToken) {
     const uri = `${this.githubApiUrl}repos/${owner}/${repoName}/branches/${branch}`;
     const { data } = await axios.get(uri, {
       params: {
-        access_token: code,
+        access_token: accessToken,
       },
     });
     return {
@@ -21,18 +19,18 @@ class GitHelper {
     };
   }
 
-  async fetchBranchCommit(owner, repoName, branch, since, code) {
+  async fetchBranchCommit(owner, repoName, branch, since, accessToken) {
     const uri = `${this.githubApiUrl}repos/${owner}/${repoName}/commits`;
     return axios.get(uri, {
       params: {
         sha: branch,
-        access_token: code,
+        access_token: accessToken,
         since,
       },
     });
   }
 
-  async createPR(owner, repoName, code) {
+  async createPR(owner, repoName, accessToken) {
     const uri = `${this.githubApiUrl}repos/${owner}/${repoName}/pulls`;
     return axios.post(uri, {
       title: 'release to master',
@@ -40,10 +38,10 @@ class GitHelper {
       base: 'master',
     }, {
       params: {
-        access_token: code,
+        access_token: accessToken,
       },
     });
   }
 }
 
-export default new GitHelper();
+export default new GithubApi();
